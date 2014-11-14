@@ -1,12 +1,7 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
-<<<<<<< HEAD
-//#include "Settings/ZTT/mus02/settings_cued_purTone_141024.h"
-#include "Settings/xx/settings_cued_purTone_141110.h"
-=======
 //#include "Settings/xx/settings_cued_purTone_141104.h"
 #include "Settings/ZTT/mus01/settings_cued_purTone_141111.h"
->>>>>>> e821142667ef015f10685f6b0ef38ca7db702733
 //#include "Settings/ZTT/mus04/settings_cued_sweep_141021.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
@@ -388,7 +383,7 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       // int DB_side[]  = {50,50};
       // DB_side[0] = 50 + random(0, 10);
       // DB_side[1] = 50 + random(0, 10);
-      toneVolume = vol[currentSide] + random(0, vol_deviation);
+      toneVolume = vol[currentSide]; // + random(0, vol_deviation);
 
 
   if (isProbeTrial[trialCount] == 1)
@@ -442,24 +437,6 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       }
 
 
-  if (isProbeTrial[trialCount] == 1)
-      {
-        toneFreq = fq_pureTone_probe[currentSide];
-       
-       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, vol[currentSide]);
-
-      Serial.print("\nProbe Tone Freq--------------: ");
-      Serial.println(fq_pureTone_probe[currentSide]);
-    //  Serial.print("Sound in DB = ");   
-    // Serial.println(SPL_in_DB);
-    Serial.print("setVolume = ");   
-    Serial.println(vol[currentSide]);
-
-
-      }
-      else{
-
-
       SPI_TGM.quick_noise_cosramp_5ms(stimDur, fq_lo, fq_hi,vol[currentSide], SWEEP_NOISE_WHITE);
       Serial.print("\nNoise Freq--------------: ");
       Serial.print(fq_lo);Serial.print("\t"); 
@@ -469,7 +446,6 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
 
 
     }
-      }
 
     else if (strcmp(stim_type, "sweep") == 0)
     {
@@ -484,23 +460,6 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
         fq_on = fq_sweep[2];
         fq_off = fq_sweep[3];
       }
-
-  if (isProbeTrial[trialCount] == 1)
-      {
-        toneFreq = fq_pureTone_probe[currentSide];
-       
-       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, vol[currentSide]);
-
-      Serial.print("\nProbe Tone Freq--------------: ");
-      Serial.println(fq_pureTone_probe[currentSide]);
-    //  Serial.print("Sound in DB = ");   
-    // Serial.println(SPL_in_DB);
-    Serial.print("setVolume = ");   
-    Serial.println(vol[currentSide]);
-
-
-      }
-      else{
       SPI_TGM.quick_sweep_exp_cosramp_5ms(stimDur, fq_on, fq_off, vol[currentSide]);
 
       Serial.print("\nSweep Freq--------------: ");
@@ -508,7 +467,6 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       Serial.println(fq_off);
       Serial.print("setVolume = ");   
       Serial.println(vol[currentSide]);
-    }
     }
 
     else if (strcmp(stim_type, "randompureTone") == 0)
