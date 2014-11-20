@@ -1,7 +1,7 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
 //#include "Settings/xx/settings_cued_purTone_141104.h"
-#include "Settings/ZTT/mus01/settings_cued_purTone_141111.h"
+#include "Settings/user/mouse_xx/settings_141120.h"
 //#include "Settings/ZTT/mus04/settings_cued_sweep_141021.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
