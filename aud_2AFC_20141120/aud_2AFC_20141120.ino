@@ -1,8 +1,8 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
 //#include "Settings/xx/settings_cued_purTone_141104.h"
-#include "Settings/user/mouse_xx/settings_141120.h"
-//#include "Settings/ZTT/mus04/settings_cued_sweep_141021.h"
+//#include "Settings/user/mouse_xx/settings_141120.h"
+#include "Settings/ZTT/mus04/settings_cued_purTone_141121.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -752,7 +752,7 @@ pinMode(rightWaterPort, OUTPUT);
   pinMode(punishment_led, OUTPUT);
   pinMode(punishment_air, OUTPUT);
   digitalWrite(initButtonPin, LOW);
-  digitalWrite(pauseButtonPin, HIGH);
+  digitalWrite(pauseButtonPin, LOW);
   digitalWrite(leftWaterPort, LOW);
   digitalWrite(rightWaterPort, LOW);
   //pinMode(led_lick_left, OUTPUT);
@@ -779,7 +779,7 @@ void loop() {
  
   while (trialCount < maxNumTrials) {
 
-    if (digitalRead(pauseButtonPin) ==  LOW)
+    if (digitalRead(pauseButtonPin) ==  HIGH)
     {
     // Wait for the first trial to start
     if (trialCount < 1) {
