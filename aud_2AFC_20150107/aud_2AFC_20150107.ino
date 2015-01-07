@@ -4,7 +4,7 @@
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
 
-#include "Settings/ztt/som04/settings_150107.h"
+#include "C:\Users\lab02\Documents\BehavData_2PRig\ZTT\Settings\ztt\som04\settings_150107_2.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -545,15 +545,13 @@ void punishmentSection(int doExtraITI) {
   //      doExtraITI = 0;
 }
 
-void flash_leftLed() {
-
+void OnLickLeft() {
   answer = LEFT;
   lickCountLeft ++ ;
 }
 
 
-void flash_rightLed() {
-
+void OnLickRight() {
   answer = RIGHT;
   lickCountRight ++ ;
 }
@@ -715,6 +713,13 @@ void man_waterValve() {
 
 }
 
+void drinkTime() {
+  int drinkStart = millis();
+  int timePassed = 0;
+  while (timePassed < drinkPeriod) {
+    timePassed = millis() - drinkStart;
+  }
+}
 
 void setup() {
  Serial.begin(115200);
@@ -742,8 +747,9 @@ void setup() {
 
  print_settings();
 //*
-attachInterrupt(0, flash_leftLed, RISING);
-attachInterrupt(1, flash_rightLed, RISING);
+attachInterrupt(0, OnLickLeft, RISING);
+attachInterrupt(1, OnLickRight, RISING);
+
 pinMode(leftWaterPort, OUTPUT);
 pinMode(rightWaterPort, OUTPUT);
   // pinMode(StimOutPin, OUTPUT);
@@ -873,7 +879,7 @@ unsigned long timeAnswerStart = millis();
         rewardDelivery(Correct);
         waterValveOpenTime = trial_millis();
         choice = Correct;
-
+        drinkTime();
         break;
       }
       else if (answer == Wrong) {

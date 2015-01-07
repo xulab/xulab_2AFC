@@ -1,10 +1,8 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
 //#include "Settings/xx/settings_cued_purTone_141104.h"
-//#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
-//#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
-
-#include "Settings/ztt/som04/settings_150107.h"
+#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
+//#include "Settings/ZTT/mus04/settings_cued_sweep_141021.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -388,7 +386,7 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       // int DB_side[]  = {50,50};
       // DB_side[0] = 50 + random(0, 10);
       // DB_side[1] = 50 + random(0, 10);
-      toneVolume = vol[currentSide]; // + random(0, vol_deviation);
+      //toneVolume = vol[currentSide]; // + random(0, vol_deviation);
 
 
   if (isProbeTrial[trialCount] == 1)
@@ -411,8 +409,8 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
         toneFreq = fq_pureTone[currentSide];
       
 
-      // SPL_in_DB = DB_side[currentSide];
-      // toneVolume = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
+      SPL_in_DB = DB_side[currentSide];
+      toneVolume = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
       // Calculate the volume settings based on the target SPL value and the calibraion curve
       // vol[currentSide] = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
 
