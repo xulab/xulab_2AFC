@@ -1,41 +1,41 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
-//#include "Settings/ZY/settings_141024.h"
-//#include "Settings/xx/settings_cued_purTone_141104.h"
-//#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
-//#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
-
-#include "C:\Users\lab02\Documents\BehavData_2PRig\ZTT\Settings\ztt\som04\settings_150108.h"
-//#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
+ // #include "Settings/ZTT/new11/settings_cued_sweep_140822.h"
 
 // #include "Settings/user/anm/settings_140808.h"
 
 //#include "Settings/user/anm/settings_140808.h"
 // #include "Settings/user/anm/settings_140807.h"
-//#include "Settings/user/anm/settings_cued_sweep_140813.h"
+#include "Settings/user/anm/settings_optoStim_141118.h"
+// #include "Settings/ZTT/new11/settings_cued_sweep_140822.h"
 
 #include <SPI_TGM.h>
 #include <SPLC.h>
 #include <RCM.h>
 #include <Wire.h>
 #include <SPI.h>
+#include <Pulse.h>
+
 
 #define leftWaterPort 11
 #define rightWaterPort 12
 
-#define initButtonPin 39
 #define LeftLickPin 2 
 #define RightLickPin 3
-#define pauseButtonPin 38
+#define initButtonPin 39
 // #define StimOutPin 9
 //#define led_lick_left 6
-#define punishment_air 7
+//#define led_lick_right 7
 // manual water delivery sensor pins
 #define man_water_left 4
 #define man_water_right 5
 
 #define triggerPin 9
 #define punishment_led 29
-#define TriggerOutPin 36
+
+#define LaserOutPin 7
+// #define pulse_dur 499
+// #define pusle_fq 20
+// #define pulse_width 10
 
 
 byte currentSide = 1;
@@ -77,6 +77,7 @@ int rand_cueOnset = 0;
 byte trialType[maxNumTrials];
 byte isProbeTrial[maxNumTrials];
 byte preStim_cue_on[maxNumTrials];
+byte isOptoTrial[maxNumTrials];
 
 byte trialStart = 0;
 byte trialEnd = 0;
@@ -84,12 +85,6 @@ byte trialEnd = 0;
 int toneFreq = 0;
 int SPL_in_DB = 0;
 int toneVolume = 0;
-
-// uint32_t lickTimeLeft[50];
-// uint32_t lickTimeRight[50];
-
-String lickTimeLeft;
-String lickTimeRight;
 
 uint32_t _millis_;
 uint32_t _second_;
@@ -105,6 +100,22 @@ uint32_t _init_date_;
 uint32_t _init_month_;
 uint32_t _init_year_;
 
+uint32_t delay_after_opto;
+
+// void pulse(uint32_t duration, float fq, uint32_t width,uint32_t pin)
+// {
+//   uint32_t time0, cycle;
+//   cycle = 1000/fq;
+//   time0 = millis();
+//   while((millis()-time0) < duration)
+//   {
+//     digitalWrite(pin, HIGH);
+//     delay(width);
+//     digitalWrite(pin, LOW);
+//     delay(cycle - width);
+//   }
+//   digitalWrite(pin, LOW);
+// }
 
 void setRandomTimes() {
   rand_stimOnset = random(stimOnsetRange[0], stimOnsetRange[1]);
@@ -193,31 +204,30 @@ void print_settings() {
   
   if (strcmp(stimType, "pureTone") == 0)
   {
-    Serial.print("toneFreq_L = ");
-    Serial.println(fq_pureTone[0]); 
-    Serial.print("toneFreq_R = ");
-    Serial.println(fq_pureTone[1]); 
+    Serial.print("toneFreq (L, R) = ");
+    Serial.print(fq_pureTone[0]); Serial.print("\t"); 
+    Serial.println(fq_pureTone[1]);
   }
   else if (strcmp(stimType, "noise") == 0)
   {
-    Serial.print("noiseBand_L = ");
+    Serial.print("Noise Freq(L,R)= ");
+    
     Serial.print(fq_noise[0]);Serial.print("\t"); 
-    Serial.println(fq_noise[1]);
-    Serial.print("noiseBand_R = ");
+    Serial.print(fq_noise[1]);Serial.print(":"); 
     Serial.print(fq_noise[2]);Serial.print("\t"); 
     Serial.println(fq_noise[3]);
+    
+
   }
 
   else if (strcmp(stimType, "sweep") == 0)
   {
-    Serial.print("sweepRange_L = ");
+    Serial.print("Sweep Freq(Low,High)= ");
     Serial.print(fq_sweep[0]);Serial.print("\t"); 
-    Serial.println(fq_sweep[1]);
-    Serial.print("sweepRange_L = ");
+    Serial.print(fq_sweep[1]);Serial.print(":"); 
     Serial.print(fq_sweep[2]);Serial.print("\t"); 
     Serial.println(fq_sweep[3]);
   }
-
   else if (strcmp(stimType, "randompureTone") == 0)
   {
     Serial.print("randompureTone(left,right)= ");
@@ -233,18 +243,13 @@ void print_settings() {
   Serial.println(probeTrial_frac);
   Serial.print("probe_stimType = ");
   Serial.println(probe_stimType);
-
-   Serial.print("freqProbe_L = ");
-    Serial.println(fq_pureTone_probe[0]);
-    Serial.print("freqProbe_R = ");
-    Serial.println(fq_pureTone_probe[0]);
-  
-
   Serial.print("stimDuration = ");
   Serial.println(stimDur);
   Serial.print("preStim_cue_frac = ");
   Serial.println(preStim_cue_frac);
- 
+  Serial.print("optoStimTrial_frac = ");
+  Serial.println(optoStimTrial_frac);
+
 
   Serial.println("###################");
 
@@ -252,7 +257,7 @@ void print_settings() {
 
 // 1, right side; 0, left side
 // void generate_random_sides(int leftProb) {
-int define_trial_types(int leftProb, int probeTrial_frac, int preStim_cue_frac) {
+int define_trial_types(int leftProb, int probeTrial_frac, int preStim_cue_frac, int optoStimTrial_frac) {
   
   // int trialType[maxNumTrials];
   // int isProbeTrial[maxNumTrials];
@@ -262,6 +267,7 @@ int define_trial_types(int leftProb, int probeTrial_frac, int preStim_cue_frac) 
   int left_count = 0;
   int consecutive_probe_trial_count = 0;
   int consecutive_cued_trial_count = 0;
+  int consecutive_opto_trial_count = 0;
   int tempval = 0;
 
   int i = 0;
@@ -322,6 +328,23 @@ while (i < maxNumTrials) {
       i = i ++;
   }
  }
+
+i = 0;
+while (i < maxNumTrials) {
+  randNumber = random(0, 100);
+  if (randNumber < optoStimTrial_frac) {
+    consecutive_opto_trial_count = consecutive_opto_trial_count ++;
+    if (consecutive_opto_trial_count <= 5) {
+      isOptoTrial[i] = 1;
+      i = i ++;
+    }
+  }
+  else {
+      isOptoTrial[i] = 0;
+      consecutive_opto_trial_count = 0;
+      i = i ++;
+  }
+ }
 }
 
 
@@ -332,15 +355,6 @@ int sendTrialStartPulse() {
   // digitalWrite(LED, LOW);
   lickCountLeft = 0;
   lickCountRight = 0;
-
-  lickTimeLeft = "|";
-  lickTimeRight = "|"; 
-
-  // for (int i = 0; i < 50; i++) {
-  //   lickTimeLeft[i] = 0;
-  //   lickTimeRight[i] = 0;
-  // }
- 
   realtime();
   trialStartTime = String(_year_);
   trialStartTime += "_";
@@ -379,7 +393,7 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
     // cue_on_str += " ........ Cue delay: ";
     // cue_on_str += String(rand_cueOnset);
     // cue_on_str += " ........ ";
-    // Serial.println(cue_on_str);  
+    // Serial.println(cue_on_str);
     
     delay(rand_cueOnset);
 
@@ -403,43 +417,83 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       // int DB_side[]  = {50,50};
       // DB_side[0] = 50 + random(0, 10);
       // DB_side[1] = 50 + random(0, 10);
-      toneVolume = vol[currentSide]; // + random(0, vol_deviation);
+      toneVolume = vol[currentSide] + random(0, vol_deviation);
+      toneFreq = fq_pureTone[currentSide];
+      SPL_in_DB = (vol[currentSide]+20)/2;
 
+      int toneVolume_SPIC = 0;
+      toneVolume_SPIC = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
 
-  if (isProbeTrial[trialCount] == 1)
-      {
-        toneFreq = fq_pureTone_probe[currentSide];
-       
-       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
-
-      Serial.print("\nProbe Tone Freq--------------: ");
-      Serial.println(fq_pureTone_probe[currentSide]);
-    //  Serial.print("Sound in DB = ");   
-    // Serial.println(SPL_in_DB);
-    Serial.print("setVolume = ");   
-    Serial.println(toneVolume);
-
-
-      }
-      else
-      {
-        toneFreq = fq_pureTone[currentSide];
-      
-
+      Serial.print("\nTone Freq--------------: ");
+      Serial.println(fq_pureTone[currentSide]);
+      //  Serial.print("Sound in DB = ");   
+      // Serial.println(SPL_in_DB);
+      Serial.print("setVolume = ");   
+      Serial.println(toneVolume);
       // SPL_in_DB = DB_side[currentSide];
       // toneVolume = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
       // Calculate the volume settings based on the target SPL value and the calibraion curve
       // vol[currentSide] = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
+      // digitalWrite(LaserOutPin, HIGH);
+      int sound_Start_Time = trial_millis();
 
-      SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
+      SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume_SPIC);
+      
+      if (isOptoTrial[trialCount] == 1) {
+      // int optoStim_Start_Time = trial_millis();
+      // pulse(optoStim_duration, pulse_freq, pulse_width, LaserOutPin);
+      PULSE.p1_sqr_wave(LaserOutPin, optoStim_duration, pulse_freq, pulse_width, TRG_H);
+      }
 
-      Serial.print("\nTone Freq--------------: ");
-      Serial.println(fq_pureTone[currentSide]);
-    //  Serial.print("Sound in DB = ");   
-    // Serial.println(SPL_in_DB);
-    Serial.print("setVolume = ");   
-    Serial.println(toneVolume);
-    }
+      // int optoStim_total1 = trial_millis() - optoStim_Start_Time;
+      //int test_delay = trial_millis();
+
+      // delay(uint16_t(stimDur - optoStim_duration));
+      //int test_delay_dur = trial_millis() - test_delay;
+      // delay(stimDur);
+      // uint16_t delay_Start_Time = trial_millis();
+      // if (stimDur > optoStim_duration){
+      //   delay_after_opto = stimDur - optoStim_duration;
+      // }
+      // else{
+      //   delay_after_opto=0;
+      // }
+      // // uint16_t delay_after_opto =((stimDur - optoStim_duration)+abs(stimDur - optoStim_duration))/2;
+      // delay (delay_after_opto);
+      // int delay_time = trial_millis() - delay_Start_Time;
+
+      // Display stim time info
+    String stim_time_info_str = String("\n\n");
+    stim_time_info_str += "sound_Start_Time = ";
+    stim_time_info_str += String(sound_Start_Time);
+    // stim_time_info_str += "\noptoStim_Start_Time = ";
+    // stim_time_info_str += String(optoStim_Start_Time);
+    // stim_time_info_str += "\noptoStim_total1 = ";
+    // stim_time_info_str += String(optoStim_total1);
+    // stim_time_info_str += "\ndelay_Start_Time = ";
+    // stim_time_info_str += String(delay_Start_Time);
+    // stim_time_info_str += "\ndelay_time = ";
+    // stim_time_info_str += String(delay_time);
+
+    //stim_time_info_str += "\ntest_delay_dur = ";
+    //stim_time_info_str += String(test_delay_dur);
+
+    // stim_time_info_str += "\noptoStim_duration_Set= ";
+    // stim_time_info_str += String(optoStim_duration);
+
+    stim_time_info_str += "\nSound_Dur_Set= ";
+    stim_time_info_str += String(stimDur);
+
+    
+
+    stim_time_info_str += " ........ \n";
+    //Serial.println(stim_time_info_str);
+    
+      // delay(stimDur - optoStim_duration);
+      // digitalWrite(LaserOutPin, LOW);
+
+      
+
   }
   else if (strcmp(stim_type, "noise") == 0)
   {
@@ -518,13 +572,13 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
 
 
 // Reward Section
-void rewardDelivery(int rewardSide) {
-  if (rewardSide == 1) {
+int rewardDelivery(int answer) {
+  if (answer == 1) {
     digitalWrite(rightWaterPort, HIGH);
     delay(rightWaterValveDuration);
     digitalWrite(rightWaterPort, LOW);
   }
-  else if (rewardSide == 0) {
+  else if (answer == 0) {
     digitalWrite(leftWaterPort, HIGH);
     delay(leftWaterValveDuration);
     digitalWrite(leftWaterPort, LOW);
@@ -555,27 +609,22 @@ void punishmentSection(int doExtraITI) {
       }
     }
     digitalWrite(punishment_led, LOW);
-    digitalWrite(punishment_air, LOW);
+    
   }
   //      doExtraITI = 0;
 }
 
-void OnLickLeft() {
+void flash_leftLed() {
+
   answer = LEFT;
   lickCountLeft ++ ;
-  // lickTimeLeft[lickCountLeft-1] = trial_millis();
-  lickTimeLeft += "|";
-  lickTimeLeft += String(trial_millis());
-
 }
 
 
-void OnLickRight() {
+void flash_rightLed() {
+
   answer = RIGHT;
   lickCountRight ++ ;
-  // lickTimeRight[lickCountRight-1] = trial_millis();
-  lickTimeRight += "|";
-  lickTimeRight += String(trial_millis());
 }
 
 /*void record_lickCountLeft(){
@@ -605,6 +654,55 @@ void OnLickRight() {
     stimType_str = stimType;
   }
   delay(deadTime);
+  // /*
+  // String trialResultsStr = String('o');
+  // // Trial settings
+  // trialResultsStr += "/Trial_Num=";
+  // trialResultsStr += String(trialCount + 1);
+  // trialResultsStr += "/Trial_Type=";
+  // trialResultsStr += currentSide;
+  // trialResultsStr += "/Trial_GPeriod=";
+  // trialResultsStr += gracePeriod;
+  // trialResultsStr += "/Trial_isProbeTrial=";
+  // trialResultsStr += isProbeTrial[trialCount];
+  // trialResultsStr += "/Trial_preStimCueOn=";
+  // trialResultsStr += preStim_cue_on[trialCount];
+  // // Stimulus properties
+  // trialResultsStr += "/Stim_Cue_ON=";
+  // trialResultsStr += preStim_cue_on[trialCount];
+  // trialResultsStr += "/Stim_cueType=";
+  // trialResultsStr += preStim_cue_type;
+  // trialResultsStr += "/Stim_cueDelay=";
+  // trialResultsStr += String(rand_cueOnset);
+
+  // trialResultsStr += "/Stim_Type=";
+  // trialResultsStr += stimType;
+  // trialResultsStr += "/Stim_toneFreq=";
+  // trialResultsStr += toneFreq;
+  // trialResultsStr += "/Stim_toneIntensity=";
+  // trialResultsStr += SPL_in_DB;
+  // trialResultsStr += "/Stim_setVolume=";
+  // trialResultsStr += vol[currentSide];
+  // trialResultsStr += "/stimDuration=";
+  // trialResultsStr += stimDur;
+  // // events times
+  // trialResultsStr += "/Time_trialStart=";
+  // trialResultsStr += trialStartTime;
+  // trialResultsStr += "/Time_stimOnset=";
+  // trialResultsStr += stimOnTime;
+  // trialResultsStr += "/Time_answer=";
+  // trialResultsStr += responseTime;
+  // trialResultsStr += "/Time_reward=";
+  // trialResultsStr += waterValveOpenTime;
+  // // animal responses
+  // trialResultsStr += "/Action_numLickLeft=";
+  // trialResultsStr += lickCountLeft;
+  // trialResultsStr += "/Action_numLickRight=";
+  // trialResultsStr += lickCountRight;
+  // trialResultsStr += "/Action_choice=";
+  // trialResultsStr += choice;
+  // trialResultsStr += "/EOL";
+
   
   Serial.print("o");
   Serial.print("/Trial_Num=");
@@ -615,6 +713,8 @@ void OnLickRight() {
   Serial.print(gracePeriod);
   Serial.print("/Trial_isProbeTrial=");
   Serial.print(isProbeTrial[trialCount]);
+  Serial.print("/Trial_isOptoTrial=");
+  Serial.print(isOptoTrial[trialCount]);
   // Serial.print("/Trial_preStimCueOn=");
   // Serial.print(preStim_cue_on[trialCount]);
   // Stimulus properties
@@ -647,19 +747,8 @@ void OnLickRight() {
   // animal responses
   Serial.print("/Action_numLickLeft=");
   Serial.print(lickCountLeft);
-  Serial.print("/Action_lickTimeLeft=");
-  Serial.print(lickTimeLeft);
-
-  // String trialResultsStr = String('o');
-  // // Trial settings
-  // trialResultsStr += "/Trial_Num=";
-  // trialResultsStr += String(trialCount + 1);
-  
   Serial.print("/Action_numLickRight=");
   Serial.print(lickCountRight);
-  Serial.print("/Action_lickTimeRight=");
-  Serial.print(lickTimeRight);
-
   Serial.print("/Action_choice=");
   Serial.print(choice);
   Serial.println("/EOL");
@@ -697,15 +786,9 @@ void man_waterValve() {
 
 }
 
-void drinkTime() {
-  int drinkStart = millis();
-  int timePassed = 0;
-  while (timePassed < drinkPeriod) {
-    timePassed = millis() - drinkStart;
-  }
-}
 
 void setup() {
+ PULSE.init();
  Serial.begin(115200);
  SPLC.init();
  init_time();
@@ -723,34 +806,33 @@ void setup() {
 
  delay(1000);
  SPI_TGM.init(MEGA2560);
- define_trial_types(leftProb, probeTrial_frac, preStim_cue_frac);
+ define_trial_types(leftProb, probeTrial_frac, preStim_cue_frac, optoStimTrial_frac);
+
+ // Serial.print("\noptoStim_duration_Set= ");
+ // Serial.println(String(optoStim_duration));
 
  Serial.println("=================================================");  
  Serial.print("#");
- Serial.println("Push the start button to start and make sure the pause button being pressed");
+ Serial.println("Push the start button to start!");
 
  print_settings();
 //*
-attachInterrupt(0, OnLickLeft, RISING);
-attachInterrupt(1, OnLickRight, RISING);
-
+attachInterrupt(0, flash_leftLed, RISING);
+attachInterrupt(1, flash_rightLed, RISING);
 pinMode(leftWaterPort, OUTPUT);
 pinMode(rightWaterPort, OUTPUT);
   // pinMode(StimOutPin, OUTPUT);
+  pinMode(LaserOutPin, OUTPUT);
+  digitalWrite(LaserOutPin, LOW);
   pinMode(LeftLickPin, INPUT);
   pinMode(RightLickPin, INPUT);
   pinMode(initButtonPin, INPUT);
-  pinMode(pauseButtonPin, INPUT);
-
   pinMode(punishment_led, OUTPUT);
-  pinMode(punishment_air, OUTPUT);
-  pinMode(TriggerOutPin, OUTPUT);
   digitalWrite(initButtonPin, LOW);
-  digitalWrite(pauseButtonPin, HIGH);
   digitalWrite(leftWaterPort, LOW);
   digitalWrite(rightWaterPort, LOW);
-  //pinMode(led_lick_left, OUTPUT);
-  //pinMode(led_lick_right, OUTPUT);
+  // pinMode(led_lick_left, OUTPUT);
+  // pinMode(led_lick_right, OUTPUT);
   pinMode(triggerPin, OUTPUT);
   digitalWrite(triggerPin, LOW);
 }
@@ -761,20 +843,14 @@ void error_led() {
   delay(errorLedDur); 
   digitalWrite(punishment_led,LOW);
 
- digitalWrite(punishment_air, HIGH);
-  delay(errorAirDur); 
-  digitalWrite(punishment_air,LOW);
 }
 
 
 void loop() {
   // int stimDelay; // for the delay time before stimulus onset
   //  Serial.println(maxNumTrials);
- 
-  while (trialCount < maxNumTrials) {
 
-    if (digitalRead(pauseButtonPin) ==  LOW)
-    {
+  while (trialCount < maxNumTrials) {
     // Wait for the first trial to start
     if (trialCount < 1) {
       while (digitalRead(initButtonPin) == HIGH) {
@@ -806,24 +882,33 @@ void loop() {
 
 // For probe trials, Correct trials is randomly defined as 0 or 1.
 // Stimulus type is also defined differently. 
-// if (isProbeTrial[trialCount] == 1) {
-//   stimType_str = probe_stimType;
-//   Correct = round(random(0, 100)/50);
-//   Wrong = 1 - Correct;
-// }
+if (isProbeTrial[trialCount] == 1) {
+  stimType_str = probe_stimType;
+  Correct = round(random(0, 100)/50);
+  Wrong = 1 - Correct;
+}
 
 // Start stimulus delivery
 // stimOnTime = trial_millis();
-digitalWrite(TriggerOutPin, HIGH);
-delay(1);
-digitalWrite(TriggerOutPin, LOW);
-delay(before_stim_delay);
 
 stimulusDelivery(trialCount, currentSide, stimType_str);
 
+uint16_t afterSound_Time = trial_millis();
+
+     
 // Delay after stimulus, where licking doens't count.
 // Some sort of grace period for making decision.
 delay(responseDelay);
+uint16_t after_responseDelay_Time = trial_millis();
+
+ // Display stim time info
+    String test_time_info_str = String("\n\n");
+    test_time_info_str += "afterSound_Time = ";
+    test_time_info_str += String(afterSound_Time);
+    test_time_info_str += "\nafter_responseDelay_Time = ";
+    test_time_info_str += String(after_responseDelay_Time);
+    test_time_info_str += " ........ \n";
+    //Serial.println(test_time_info_str);
 
 // Start answer judgement
 unsigned long timePassed = 0;
@@ -848,22 +933,14 @@ unsigned long timeAnswerStart = millis();
 
       if (answer != MISS) {
         responseTime = trial_millis();
-        // Probe trials
-        if (isProbeTrial[trialCount] == 1) {
-          // rewardDelivery(round(random(0, 100)/50));
-          stimType_str = probe_stimType;
-          choice = answer;
-          break;
-        }
       }
-
 
       if (answer == Correct) {
         delay(waterValveDelay);
         rewardDelivery(Correct);
         waterValveOpenTime = trial_millis();
         choice = Correct;
-        drinkTime();
+
         break;
       }
       else if (answer == Wrong) {
@@ -892,7 +969,6 @@ unsigned long timeAnswerStart = millis();
 sendOutResults();
 trialCount++;
 delay(interTrialInterval);
-}
 }
 
 }

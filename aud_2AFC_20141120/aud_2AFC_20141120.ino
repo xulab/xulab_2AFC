@@ -1,10 +1,15 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
 //#include "Settings/xx/settings_cued_purTone_141104.h"
+<<<<<<< HEAD
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
 
 #include "Settings/ztt/som04/settings_150107.h"
+=======
+//#include "Settings/user/mouse_xx/settings_141120.h"
+#include "Settings/ZTT/mus04/settings_cued_purTone_141121.h"
+>>>>>>> d56a267a970aaf77dd19db763307b05ee5ea4b9f
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -756,7 +761,7 @@ pinMode(rightWaterPort, OUTPUT);
   pinMode(punishment_air, OUTPUT);
   pinMode(TriggerOutPin, OUTPUT);
   digitalWrite(initButtonPin, LOW);
-  digitalWrite(pauseButtonPin, HIGH);
+  digitalWrite(pauseButtonPin, LOW);
   digitalWrite(leftWaterPort, LOW);
   digitalWrite(rightWaterPort, LOW);
   //pinMode(led_lick_left, OUTPUT);
@@ -783,7 +788,7 @@ void loop() {
  
   while (trialCount < maxNumTrials) {
 
-    if (digitalRead(pauseButtonPin) ==  LOW)
+    if (digitalRead(pauseButtonPin) ==  HIGH)
     {
     // Wait for the first trial to start
     if (trialCount < 1) {
