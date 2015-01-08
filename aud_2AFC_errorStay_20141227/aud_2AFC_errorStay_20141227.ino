@@ -1,12 +1,16 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
-//#include "Settings/xx/settings_cued_purTone_141129.h"
-//#include "Settings/ZTT/crm03/settings_cued_purTone_141203.h"
-//#include "Settings/ZTT/som04/settings_cued_purTone_141218.h"
- //#include "/home/xulab/Behavior_rig_04/behavior_data_rig04/CLL/cll_C03/settings_cued_purTone_141209.h"
-//#include "Settings/CRM/CRM03/settings_141114.h"
-#include "/home/xulab/Behavior_rig_04/behavior_data_rig04/CLL/cll_VIP01/Settings/settings_cll_VIP01_141228.h"
-//#include "Settings/user/anm/settings_140808.h"
+//#include "Settings/ZTT//settings_cued_sweep_141021.h"
+//#include "Settings/ZTT/som02/settings_141217.h"
+// #include "/home/xulab/Behavior_rig_04/behavior_data_rig04/CLL/cll_VIP03/Settings/settings_cll_VIP03_150103.h"
+//#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
+
+// #include "Settings/user/mouse_xx/ai01/settings_141217.h"
+// #include "Settings/user/mouse_xx/b04a01/settings_141221.h"
+
+//#include "Settings/CRM/CRM01/settings_141030.h"
+ // #include "Settings/xx/batch_ai/mouse01/settings_puretone_150102.h"
+ #include "Settings/xx/batch04/mouse02/settings_puretone_150107.h"
 // #include "Settings/user/anm/settings_140807.h"
 //#include "Settings/user/anm/settings_cued_sweep_140813.h"
 
@@ -22,9 +26,10 @@
 #define LeftLickPin 2 
 #define RightLickPin 3
 #define initButtonPin 8
+#define pauseButtonPin 38
 // #define StimOutPin 9
-#define led_lick_left 6
-#define led_lick_right 7
+//#define led_lick_left 6
+#define punishment_air 7
 // manual water delivery sensor pins
 #define man_water_left 4
 #define man_water_right 5
@@ -182,30 +187,31 @@ void print_settings() {
   
   if (strcmp(stimType, "pureTone") == 0)
   {
-    Serial.print("toneFreq (L, R) = ");
-    Serial.print(fq_pureTone[0]); Serial.print("\t"); 
-    Serial.println(fq_pureTone[1]);
+    Serial.print("toneFreq_L = ");
+    Serial.println(fq_pureTone[0]); 
+    Serial.print("toneFreq_R = ");
+    Serial.println(fq_pureTone[1]); 
   }
   else if (strcmp(stimType, "noise") == 0)
   {
-    Serial.print("Noise Freq(L,R)= ");
-    
+    Serial.print("noiseBand_L = ");
     Serial.print(fq_noise[0]);Serial.print("\t"); 
-    Serial.print(fq_noise[1]);Serial.print(":"); 
+    Serial.println(fq_noise[1]);
+    Serial.print("noiseBand_R = ");
     Serial.print(fq_noise[2]);Serial.print("\t"); 
     Serial.println(fq_noise[3]);
-    
-
   }
 
   else if (strcmp(stimType, "sweep") == 0)
   {
-    Serial.print("Sweep Freq(Low,High)= ");
+    Serial.print("sweepRange_L = ");
     Serial.print(fq_sweep[0]);Serial.print("\t"); 
-    Serial.print(fq_sweep[1]);Serial.print(":"); 
+    Serial.println(fq_sweep[1]);
+    Serial.print("sweepRange_L = ");
     Serial.print(fq_sweep[2]);Serial.print("\t"); 
     Serial.println(fq_sweep[3]);
   }
+
   else if (strcmp(stimType, "randompureTone") == 0)
   {
     Serial.print("randompureTone(left,right)= ");
@@ -222,16 +228,17 @@ void print_settings() {
   Serial.print("probe_stimType = ");
   Serial.println(probe_stimType);
 
-  Serial.print("fq_probe (L, R) = ");
-  Serial.print(fq_pureTone_probe[0]); Serial.print("\t"); 
-  Serial.println(fq_pureTone_probe[1]);
+   Serial.print("freqProbe_L = ");
+    Serial.println(fq_pureTone_probe[0]);
+    Serial.print("freqProbe_R = ");
+    Serial.println(fq_pureTone_probe[1]);
   
 
   Serial.print("stimDuration = ");
   Serial.println(stimDur);
   Serial.print("preStim_cue_frac = ");
   Serial.println(preStim_cue_frac);
-  
+ 
 
   Serial.println("###################");
 
@@ -239,8 +246,8 @@ void print_settings() {
 
 // 1, right side; 0, left side
 // void generate_random_sides(int leftProb) {
-  int define_trial_types(int leftProb, int probeTrial_frac, int preStim_cue_frac) {
-    
+int define_trial_types(int leftProb, int probeTrial_frac, int preStim_cue_frac) {
+  
   // int trialType[maxNumTrials];
   // int isProbeTrial[maxNumTrials];
   // int preStim_cue_on[maxNumTrials];
@@ -304,11 +311,11 @@ while (i < maxNumTrials) {
     }
   }
   else {
-    preStim_cue_on[i] = 0;
-    consecutive_cued_trial_count = 0;
-    i = i ++;
+      preStim_cue_on[i] = 0;
+      consecutive_cued_trial_count = 0;
+      i = i ++;
   }
-}
+ }
 }
 
 
@@ -357,12 +364,12 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
     // cue_on_str += " ........ Cue delay: ";
     // cue_on_str += String(rand_cueOnset);
     // cue_on_str += " ........ ";
-    // Serial.println(cue_on_str);
+    // Serial.println(cue_on_str);  
     
     delay(rand_cueOnset);
 
-    Serial.print("\nPlay Cue Noise............ ");
-    
+      Serial.print("\nPlay Cue Noise............ ");
+      
     cueOnTime = trial_millis();
     // play cue sound
     SPI_TGM.quick_noise_cosramp_5ms(preStim_cue_dur, f1, f2, preStim_cue_vol, SWEEP_NOISE_WHITE);
@@ -381,28 +388,28 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       // int DB_side[]  = {50,50};
       // DB_side[0] = 50 + random(0, 10);
       // DB_side[1] = 50 + random(0, 10);
-      toneVolume = vol[currentSide]; // + random(0, vol_deviation);
+      toneVolume = vol[currentSide] + random(0, vol_deviation);
 
 
-      if (isProbeTrial[trialCount] == 1)
+  if (isProbeTrial[trialCount] == 1)
       {
         toneFreq = fq_pureTone_probe[currentSide];
-        
-        SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
+       
+       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
 
-        Serial.print("\nProbe Tone Freq--------------: ");
-        Serial.println(fq_pureTone_probe[currentSide]);
+      Serial.print("\nProbe Tone Freq--------------: ");
+      Serial.println(fq_pureTone_probe[currentSide]);
     //  Serial.print("Sound in DB = ");   
     // Serial.println(SPL_in_DB);
     Serial.print("setVolume = ");   
     Serial.println(toneVolume);
 
 
-  }
-  else
-  {
-    toneFreq = fq_pureTone[currentSide];
-    
+      }
+      else
+      {
+        toneFreq = fq_pureTone[currentSide];
+      
 
       // SPL_in_DB = DB_side[currentSide];
       // toneVolume = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
@@ -417,13 +424,13 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
     // Serial.println(SPL_in_DB);
     Serial.print("setVolume = ");   
     Serial.println(toneVolume);
+    }
   }
-}
-else if (strcmp(stim_type, "noise") == 0)
-{
+  else if (strcmp(stim_type, "noise") == 0)
+  {
 
-  int fq_lo = 0;
-  int fq_hi = 0;
+    int fq_lo = 0;
+    int fq_hi = 0;
 
       if (currentSide == LEFT){ // upward sweeps
         fq_lo = fq_noise[0];
@@ -434,14 +441,29 @@ else if (strcmp(stim_type, "noise") == 0)
         fq_hi = fq_noise[3];
       }
 
+if (isProbeTrial[trialCount] == 1)
+      {
+        toneFreq = fq_pureTone_probe[currentSide];
+       
+       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, vol[currentSide]);
 
+      Serial.print("\nProbe Tone Freq--------------: ");
+      Serial.println(fq_pureTone_probe[currentSide]);
+    //  Serial.print("Sound in DB = ");   
+    // Serial.println(SPL_in_DB);
+    Serial.print("setVolume = ");   
+    Serial.println(vol[currentSide]);
+
+
+      }
+      else{
       SPI_TGM.quick_noise_cosramp_5ms(stimDur, fq_lo, fq_hi,vol[currentSide], SWEEP_NOISE_WHITE);
       Serial.print("\nNoise Freq--------------: ");
       Serial.print(fq_lo);Serial.print("\t"); 
       Serial.println(fq_hi);
       Serial.print("setVolume = ");   
       Serial.println(vol[currentSide]);
-
+}
 
     }
 
@@ -458,6 +480,22 @@ else if (strcmp(stim_type, "noise") == 0)
         fq_on = fq_sweep[2];
         fq_off = fq_sweep[3];
       }
+      if (isProbeTrial[trialCount] == 1)
+      {
+        toneFreq = fq_pureTone_probe[currentSide];
+       
+       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, vol[currentSide]);
+
+      Serial.print("\nProbe Tone Freq--------------: ");
+      Serial.println(fq_pureTone_probe[currentSide]);
+    //  Serial.print("Sound in DB = ");   
+    // Serial.println(SPL_in_DB);
+    Serial.print("setVolume = ");   
+    Serial.println(vol[currentSide]);
+
+
+      }
+      else{
       SPI_TGM.quick_sweep_exp_cosramp_5ms(stimDur, fq_on, fq_off, vol[currentSide]);
 
       Serial.print("\nSweep Freq--------------: ");
@@ -466,6 +504,7 @@ else if (strcmp(stim_type, "noise") == 0)
       Serial.print("setVolume = ");   
       Serial.println(vol[currentSide]);
     }
+  }
 
     else if (strcmp(stim_type, "randompureTone") == 0)
     {
@@ -533,7 +572,7 @@ void punishmentSection(int doExtraITI) {
       }
     }
     digitalWrite(punishment_led, LOW);
-    
+    digitalWrite(punishment_air, LOW);
   }
   //      doExtraITI = 0;
 }
@@ -731,7 +770,7 @@ void setup() {
 
  Serial.println("=================================================");  
  Serial.print("#");
- Serial.println("Push the start button to start!");
+ Serial.println("Push the start button to start and make sure the pause button being pressed");
 
  print_settings();
 //*
@@ -743,14 +782,20 @@ pinMode(rightWaterPort, OUTPUT);
   pinMode(LeftLickPin, INPUT);
   pinMode(RightLickPin, INPUT);
   pinMode(initButtonPin, INPUT);
+  pinMode(pauseButtonPin, INPUT);
+
   pinMode(punishment_led, OUTPUT);
+  pinMode(punishment_air, OUTPUT);
   digitalWrite(initButtonPin, LOW);
+  digitalWrite(pauseButtonPin, LOW);
   digitalWrite(leftWaterPort, LOW);
   digitalWrite(rightWaterPort, LOW);
-  pinMode(led_lick_left, OUTPUT);
-  pinMode(led_lick_right, OUTPUT);
+  //pinMode(led_lick_left, OUTPUT);
+  //pinMode(led_lick_right, OUTPUT);
   pinMode(triggerPin, OUTPUT);
   digitalWrite(triggerPin, LOW);
+
+  digitalWrite(pauseButtonPin, HIGH);
 }
 
 
@@ -759,14 +804,20 @@ void error_led() {
   delay(errorLedDur); 
   digitalWrite(punishment_led,LOW);
 
+ digitalWrite(punishment_air, HIGH);
+  delay(errorAirDur); 
+  digitalWrite(punishment_air,LOW);
 }
 
 
 void loop() {
   // int stimDelay; // for the delay time before stimulus onset
   //  Serial.println(maxNumTrials);
-
+ 
   while (trialCount < maxNumTrials) {
+
+    if (digitalRead(pauseButtonPin) ==  HIGH)
+    {
     // Wait for the first trial to start
     if (trialCount < 1) {
       while (digitalRead(initButtonPin) == HIGH) {
@@ -864,6 +915,12 @@ unsigned long timeAnswerStart = millis();
             doExtraITI = 1;
             punishmentSection(doExtraITI);
             choice = Wrong;
+            // This is for "Error Stay" training, 
+            // repeat the same side in the next n trials
+            for (int counts=1; counts<=n_error_stay; counts++) {
+              trialType[ trialCount + counts ] = currentSide;  
+            }
+            
             break;
           }
           else { 
@@ -879,6 +936,7 @@ unsigned long timeAnswerStart = millis();
 sendOutResults();
 trialCount++;
 delay(interTrialInterval);
+}
 }
 
 }

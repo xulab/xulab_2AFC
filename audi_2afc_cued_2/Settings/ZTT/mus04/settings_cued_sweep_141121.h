@@ -11,6 +11,7 @@ const int maxSameSides = 5;
 const int leftProb = 30; // 50% of trials are left side.
 const int probeTrial_frac = 0; // fraction of probe trials: 25% .
 char probe_stimType[] = "sweep";
+const int fq_pureTone_probe[2] ={6000,25000};
 char stimType[] = "pureTone"; // "noise";// "pureTone";//"sweep";//randompureTone
 // Cue parameters
 const int preStim_cue_frac = 0; // % of trials with pre-stimulus cues
@@ -22,8 +23,8 @@ const int preStim_cue_vol = 120;
 const int post_cue_stim_delay = 1200; // delay time after cue and before stimulus
 
 // Reward parameters
-const int leftWaterValveDuration =  20;
-const int rightWaterValveDuration = 25;
+const int leftWaterValveDuration =  30;
+const int rightWaterValveDuration = 22;
 const byte LEFT = 0;
 const byte RIGHT = 1;
 const byte MISS = 2;
@@ -41,7 +42,7 @@ const int interTrialInterval = 2000;
 const int stimDur = 300;
 	// make sure the total delay for stimulus is the same with or without cue.
 int stimOnsetRange[2] = {500 + post_cue_stim_delay, 2000 + post_cue_stim_delay};
-const uint16_t fq_pureTone[2] = {10000, 20000};//{16000, 22000}; //
+const uint16_t fq_pureTone[2] = {8000, 20000};//{16000, 22000}; //
 const int ranTone_left[3] = {6500, 7500, 8500};
 const int ranTone_right[3] = {12500, 13500, 15500};
 
@@ -54,7 +55,7 @@ const int fq_noise[4]={6000,12000,12000,24000};
 const int fq_sweep[4] ={6000,12000,12000,24000};
 
 const int errorLedDur = 10; 
-const int errorLedAir = 0; 
+const int errorAirDur = 0; 
 
 
 // 1, right side; 0, left side
