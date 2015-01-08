@@ -1,15 +1,9 @@
 // This is based on a previous version: Tone_2AFC_06_combined_2
 //#include "Settings/ZY/settings_141024.h"
 //#include "Settings/xx/settings_cued_purTone_141104.h"
-<<<<<<< HEAD
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
-
-#include "Settings/ztt/som04/settings_150107.h"
-=======
-//#include "Settings/user/mouse_xx/settings_141120.h"
-#include "Settings/ZTT/mus04/settings_cued_purTone_141121.h"
->>>>>>> d56a267a970aaf77dd19db763307b05ee5ea4b9f
+#include "/home/xulab/Behavior_rig_11/behavior_data_rig11/ZL/z00/Settings/ZL_z00_settings_150108.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -236,7 +230,7 @@ void print_settings() {
    Serial.print("freqProbe_L = ");
     Serial.println(fq_pureTone_probe[0]);
     Serial.print("freqProbe_R = ");
-    Serial.println(fq_pureTone_probe[0]);
+    Serial.println(fq_pureTone_probe[1]);
   
 
   Serial.print("stimDuration = ");
@@ -768,6 +762,8 @@ pinMode(rightWaterPort, OUTPUT);
   //pinMode(led_lick_right, OUTPUT);
   pinMode(triggerPin, OUTPUT);
   digitalWrite(triggerPin, LOW);
+
+  digitalWrite(pauseButtonPin, HIGH);
 }
 
 
@@ -832,7 +828,7 @@ void loop() {
 digitalWrite(TriggerOutPin, HIGH);
 delay(1);
 digitalWrite(TriggerOutPin, LOW);
-delay(before_stim_delay);
+delay(rand_stimOnset);
 
 stimulusDelivery(trialCount, currentSide, stimType_str);
 

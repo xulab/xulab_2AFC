@@ -10,7 +10,7 @@
 
 //#include "Settings/CRM/CRM01/settings_141030.h"
  // #include "Settings/xx/batch_ai/mouse01/settings_puretone_150102.h"
- #include "Settings/xx/batch04/mouse02/settings_puretone_150107.h"
+ #include "/home/xulab/Behavior_rig_11/behavior_data_rig11/ZL/z00/Settings/ZL_z00_settings_150108.h"
 // #include "Settings/user/anm/settings_140807.h"
 //#include "Settings/user/anm/settings_cued_sweep_140813.h"
 
@@ -25,7 +25,7 @@
 
 #define LeftLickPin 2 
 #define RightLickPin 3
-#define initButtonPin 8
+#define initButtonPin 39
 #define pauseButtonPin 38
 // #define StimOutPin 9
 //#define led_lick_left 6
@@ -36,6 +36,7 @@
 
 #define triggerPin 9
 #define punishment_led 29
+#define TriggerOutPin 36
 
 
 byte currentSide = 1;
@@ -157,6 +158,9 @@ void print_settings() {
   Serial.print("maxSameSides = ");
   Serial.println(maxSameSides);
 
+  Serial.print("Error_stay_number = ");
+  Serial.println(n_error_stay);
+  
   Serial.print("leftProb = ");
   Serial.println(leftProb);
   
@@ -786,6 +790,7 @@ pinMode(rightWaterPort, OUTPUT);
 
   pinMode(punishment_led, OUTPUT);
   pinMode(punishment_air, OUTPUT);
+  pinMode(TriggerOutPin, OUTPUT);
   digitalWrite(initButtonPin, LOW);
   digitalWrite(pauseButtonPin, LOW);
   digitalWrite(leftWaterPort, LOW);
@@ -794,8 +799,6 @@ pinMode(rightWaterPort, OUTPUT);
   //pinMode(led_lick_right, OUTPUT);
   pinMode(triggerPin, OUTPUT);
   digitalWrite(triggerPin, LOW);
-
-  digitalWrite(pauseButtonPin, HIGH);
 }
 
 
@@ -820,7 +823,7 @@ void loop() {
     {
     // Wait for the first trial to start
     if (trialCount < 1) {
-      while (digitalRead(initButtonPin) == HIGH) {
+      while (digitalRead(initButtonPin) == LOW) {
       }
     }
     setRandomTimes();
