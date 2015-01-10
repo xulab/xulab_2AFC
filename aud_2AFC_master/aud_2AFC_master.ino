@@ -4,7 +4,7 @@
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
 
-#include "/home/xulab/behavior_rig_02/Arduino/Sketchbook_rig02/xulab_2AFC/aud_2AFC_master/settings_cued_purTone_141121.h"
+#include "/home/xulab/Behavior_rig_11/behavior_data_rig11/ZL/z01/Settings/ZL_z01_settings_150110.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -172,6 +172,9 @@ void print_settings() {
   Serial.print("maxSameSides = ");
   Serial.println(maxSameSides);
 
+  Serial.print("Error_stay_number = ");
+  Serial.println(n_error_stay);
+  
   Serial.print("leftProb = ");
   Serial.println(leftProb);
   
@@ -246,7 +249,7 @@ void print_settings() {
    Serial.print("freqProbe_L = ");
     Serial.println(fq_pureTone_probe[0]);
     Serial.print("freqProbe_R = ");
-    Serial.println(fq_pureTone_probe[0]);
+    Serial.println(fq_pureTone_probe[1]);
   
 
   Serial.print("stimDuration = ");
@@ -411,93 +414,26 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       // DB_side[1] = 50 + random(0, 10);
       toneVolume = vol[currentSide]; // + random(0, vol_deviation);
 
-
-  if (isProbeTrial[trialCount] == 1)
-      {
-        toneFreq = fq_pureTone_probe[currentSide];
-       
-       SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
-
-      Serial.print("\nProbe Tone Freq--------------: ");
-      Serial.println(fq_pureTone_probe[currentSide]);
+    if (isProbeTrial[trialCount] == 1)
+    {
+      toneFreq = fq_pureTone_probe[currentSide];
+    }
+    else // not probe trial
+    {
+      toneFreq = fq_pureTone[currentSide];
+    }
+    // Play pure tone
+    Serial.print("\nTone Freq--------------: ");
+    Serial.println(toneFreq);
     //  Serial.print("Sound in DB = ");   
     // Serial.println(SPL_in_DB);
     Serial.print("setVolume = ");   
     Serial.println(toneVolume);
 
-
-      }
-      else
-      {
-        toneFreq = fq_pureTone[currentSide];
-      
-
-      // SPL_in_DB = DB_side[currentSide];
-      // toneVolume = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
-      // Calculate the volume settings based on the target SPL value and the calibraion curve
-      // vol[currentSide] = SPLC.get_D_SPL(toneFreq, SPL_in_DB);
-
-      SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
-
-      delay (stimDur);
-
-
-      // if (isOptoTrial[trialCount] == 1 and isProbeTrial) {
-      // // int optoStim_Start_Time = trial_millis();
-      // // pulse(optoStim_duration, pulse_freq, pulse_width, LaserOutPin);
-      // PULSE.p1_sqr_wave(LaserOutPin, optoStim_duration, pulse_freq, pulse_width, TRG_H);
-      // }
-
-      // int optoStim_total1 = trial_millis() - optoStim_Start_Time;
-      //int test_delay = trial_millis();
-
-      // delay(uint16_t(stimDur - optoStim_duration));
-      //int test_delay_dur = trial_millis() - test_delay;
-      // delay(stimDur);
-      // uint16_t delay_Start_Time = trial_millis();
-      // if (stimDur > optoStim_duration){
-      //   delay_after_opto = stimDur - optoStim_duration;
-      // }
-      // else{
-      //   delay_after_opto=0;
-      // }
-      // // uint16_t delay_after_opto =((stimDur - optoStim_duration)+abs(stimDur - optoStim_duration))/2;
-      // delay (delay_after_opto);
-      // int delay_time = trial_millis() - delay_Start_Time;
-
-      // Display stim time info
-    String stim_time_info_str = String("\n\n");
-    stim_time_info_str += "sound_Start_Time = ";
-    stim_time_info_str += String(sound_Start_Time);
-    // stim_time_info_str += "\noptoStim_Start_Time = ";
-    // stim_time_info_str += String(optoStim_Start_Time);
-    // stim_time_info_str += "\noptoStim_total1 = ";
-    // stim_time_info_str += String(optoStim_total1);
-    // stim_time_info_str += "\ndelay_Start_Time = ";
-    // stim_time_info_str += String(delay_Start_Time);
-    // stim_time_info_str += "\ndelay_time = ";
-    // stim_time_info_str += String(delay_time);
-
-    //stim_time_info_str += "\ntest_delay_dur = ";
-    //stim_time_info_str += String(test_delay_dur);
-
-    // stim_time_info_str += "\noptoStim_duration_Set= ";
-    // stim_time_info_str += String(optoStim_duration);
-
-    stim_time_info_str += "\nSound_Dur_Set= ";
-    stim_time_info_str += String(stimDur);
-
-    
-
-    stim_time_info_str += " ........ \n";
-    //Serial.println(stim_time_info_str);
-    
-      // delay(stimDur - optoStim_duration);
-      // digitalWrite(LaserOutPin, LOW);
-
-      
-
+    SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
+    delay (stimDur);
   }
+
   else if (strcmp(stim_type, "noise") == 0)
   {
 
@@ -511,9 +447,7 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       if (currentSide == RIGHT){ // downward sweeps
         fq_lo = fq_noise[2];
         fq_hi = fq_noise[3];
-      }
-
-
+      
       SPI_TGM.quick_noise_cosramp_5ms(stimDur, fq_lo, fq_hi,vol[currentSide], SWEEP_NOISE_WHITE);
       Serial.print("\nNoise Freq--------------: ");
       Serial.print(fq_lo);Serial.print("\t"); 
@@ -521,8 +455,8 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       Serial.print("setVolume = ");   
       Serial.println(vol[currentSide]);
 
-
     }
+  }
 
     else if (strcmp(stim_type, "sweep") == 0)
     {
@@ -537,6 +471,7 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
         fq_on = fq_sweep[2];
         fq_off = fq_sweep[3];
       }
+      
       SPI_TGM.quick_sweep_exp_cosramp_5ms(stimDur, fq_on, fq_off, vol[currentSide]);
 
       Serial.print("\nSweep Freq--------------: ");
@@ -568,9 +503,7 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
       Serial.print("setVolume = ");   
       Serial.println(toneVolume);
     }
-    else {
-      Serial.println("Error! Wrong stimType in Settings!");
-    }
+
   }
 
 
@@ -635,24 +568,8 @@ void OnLickRight() {
   lickTimeRight += String(trial_millis());
 }
 
-/*void record_lickCountLeft(){
-
- digitalWrite(led_lick_left, HIGH);
- delayMicroseconds(500);
- digitalWrite(led_lick_left, LOW);
- lickCountLeft ++ ;
- }
- void record_lickCountRight(){
-
-
- lickCountRight ++ ;
- }
- */
  void sendOutResults() {
   int deadTime = 1000;
-  //  unsigned long deadTimeStart = millis();
-  //    while ((millis() - deadTimeStart) < deadTime) {
-  //    }
   char* stimType_str;
 
   if (isProbeTrial[trialCount] == 1) {
@@ -707,12 +624,7 @@ void OnLickRight() {
   Serial.print("/Action_lickTimeLeft=");
   Serial.print(lickTimeLeft);
 
-  // String trialResultsStr = String('o');
-  // // Trial settings
-  // trialResultsStr += "/Trial_Num=";
-  // trialResultsStr += String(trialCount + 1);
-  
-  Serial.print("/Action_numLickRight=");
+   Serial.print("/Action_numLickRight=");
   Serial.print(lickCountRight);
   Serial.print("/Action_lickTimeRight=");
   Serial.print(lickTimeRight);
@@ -762,6 +674,73 @@ void drinkTime() {
   }
 }
 
+void choice_outcome_state() {
+  // Start answer judgement
+  unsigned long timePassed = 0;
+  unsigned long timeAnswerStart = millis();
+  
+  int gracePeriod_onset = trial_millis();
+  int gracePeriod_pass = 0;
+    // Initialize answer value as MISS.
+    // "answer" changes upon every lick, 
+  // use "choice" to record the final behavioral response.
+  answer = MISS;
+
+  choice = MISS; 
+  
+  // Enter Answer period
+  while (timePassed < answerPeriod) {
+    // Deliver water when manually press the sensors
+    man_waterValve();
+
+    timePassed = millis() - timeAnswerStart;
+
+    if (answer != MISS) {
+      responseTime = trial_millis();
+      // Probe trials
+      if (isProbeTrial[trialCount] == 1) {
+        // rewardDelivery(round(random(0, 100)/50));
+        choice = answer;
+        delay(waterValveDelay);
+        rewardDelivery(choice);
+        break;
+      }
+
+      if (answer == Correct) {
+        delay(waterValveDelay);
+        rewardDelivery(Correct);
+        waterValveOpenTime = trial_millis();
+        choice = Correct;
+        drinkTime();
+        break;
+      }
+      if (answer == Wrong) {
+        // responseTime = trial_millis();
+        // Wrong answer, enter grace period
+        error_led(); // give feedback to animal of Wrong choice.
+        gracePeriod_pass = trial_millis() - gracePeriod_onset;
+        if (gracePeriod_pass > gracePeriod) {
+              // Use extra ITI as punishment
+              doExtraITI = 1;
+              punishmentSection(doExtraITI);
+              choice = Wrong;
+              // This is for "Error Stay" training, 
+              // repeat the same side in the next n trials
+              for (int counts=1; counts<=n_error_stay; counts++) {
+                trialType[ trialCount + counts ] = currentSide;  
+              }
+          
+          break;
+        }
+      }
+    // answer = getAnswers(answerPeriod);
+    if (answer == 2) {
+    // Miss! Do nonthing.
+      }
+    }
+  }
+}
+
 void setup() {
  Serial.begin(115200);
  SPLC.init();
@@ -780,7 +759,7 @@ void setup() {
 
  delay(1000);
  SPI_TGM.init(MEGA2560);
- define_trial_types(leftProb, probeTrial_frac, preStim_cue_frac, optoStimTrial_frac, opto_side);
+ define_trial_types(leftProb, probeTrial_frac, preStim_cue_frac);
 
  // Serial.print("\noptoStim_duration_Set= ");
  // Serial.println(String(optoStim_duration));
@@ -808,7 +787,7 @@ pinMode(rightWaterPort, OUTPUT);
   pinMode(punishment_air, OUTPUT);
   pinMode(TriggerOutPin, OUTPUT);
   digitalWrite(initButtonPin, LOW);
-  digitalWrite(pauseButtonPin, HIGH);
+  digitalWrite(pauseButtonPin, LOW);
   digitalWrite(leftWaterPort, LOW);
   digitalWrite(rightWaterPort, LOW);
   //pinMode(led_lick_left, OUTPUT);
@@ -835,11 +814,11 @@ void loop() {
  
   while (trialCount < maxNumTrials) {
 
-    if (digitalRead(pauseButtonPin) ==  LOW)
+    if (digitalRead(pauseButtonPin) ==  HIGH)
     {
     // Wait for the first trial to start
     if (trialCount < 1) {
-      while (digitalRead(initButtonPin) == HIGH) {
+      while (digitalRead(initButtonPin) == LOW) {
       }
     }
     setRandomTimes();
@@ -850,111 +829,40 @@ void loop() {
     // delay(stimDelay);
 
     char* stimType_str = stimType;
-  // Define trial type and Correct response
-  if (isRandomSides == 1) {
-    currentSide = trialType[trialCount];
+    // Define trial type and Correct response
+    if (isRandomSides == 1) {
+      currentSide = trialType[trialCount];
+    }
+    else {
+      currentSide = userDefinedSide;
+    }
+    if (currentSide == LEFT) {
+      Correct  = LEFT;
+      Wrong = RIGHT;
+    }
+    else if (currentSide == RIGHT) {
+      Correct  = RIGHT;
+      Wrong = LEFT;
+    }
+
+    // Start stimulus delivery
+    // stimOnTime = trial_millis();
+    digitalWrite(TriggerOutPin, HIGH);
+    delay(1);
+    digitalWrite(TriggerOutPin, LOW);
+    delay(rand_stimOnset);
+
+    stimulusDelivery(trialCount, currentSide, stimType_str);
+
+    // Delay after stimulus, where licking doens't count.
+    // Some sort of grace period for making decision.
+    delay(responseDelay);
+
+    choice_outcome_state();
+
+    sendOutResults();
+    trialCount++;
+    delay(interTrialInterval);
+    }
   }
-  else {
-    currentSide = userDefinedSide;
-  }
-  if (currentSide == LEFT) {
-    Correct  = LEFT;
-    Wrong = RIGHT;
-  }
-  else if (currentSide == RIGHT) {
-    Correct  = RIGHT;
-    Wrong = LEFT;
-  }
-
-// For probe trials, Correct trials is randomly defined as 0 or 1.
-// Stimulus type is also defined differently. 
-// if (isProbeTrial[trialCount] == 1) {
-//   stimType_str = probe_stimType;
-//   Correct = round(random(0, 100)/50);
-//   Wrong = 1 - Correct;
-// }
-
-// Start stimulus delivery
-// stimOnTime = trial_millis();
-digitalWrite(TriggerOutPin, HIGH);
-delay(1);
-digitalWrite(TriggerOutPin, LOW);
-delay(before_stim_delay);
-
-stimulusDelivery(trialCount, currentSide, stimType_str);
-
-// Delay after stimulus, where licking doens't count.
-// Some sort of grace period for making decision.
-delay(responseDelay);
-
-// Start answer judgement
-unsigned long timePassed = 0;
-unsigned long timeAnswerStart = millis();
-    // Initialize answer value as MISS.
-    // "answer" changes upon every lick, 
-    // use "choice" to record the final behavioral response.
-    answer = MISS;
-
-    choice = MISS; 
-    // Default value of choice is MISS. 
-    // It will be changed if lick happens during answer period.
-    
-    int gracePeriod_onset = trial_millis();
-    int gracePeriod_pass = 0;
-    // Enter Answer period
-    while (timePassed < answerPeriod) {
-      // Deliver water when manually press the sensors
-      man_waterValve();
-
-      timePassed = millis() - timeAnswerStart;
-
-      if (answer != MISS) {
-        responseTime = trial_millis();
-        // Probe trials
-        if (isProbeTrial[trialCount] == 1) {
-          // rewardDelivery(round(random(0, 100)/50));
-          stimType_str = probe_stimType;
-          choice = answer;
-          break;
-        }
-      }
-
-
-      if (answer == Correct) {
-        delay(waterValveDelay);
-        rewardDelivery(Correct);
-        waterValveOpenTime = trial_millis();
-        choice = Correct;
-        drinkTime();
-        break;
-      }
-      else if (answer == Wrong) {
-      // responseTime = trial_millis();
-      // Wrong answer, enter grace period
-      error_led(); // give feedback to animal of Wrong choice.
-      
-      gracePeriod_pass = trial_millis() - gracePeriod_onset;
-      if (gracePeriod_pass > gracePeriod) {
-            // Use extra ITI as punishment
-            doExtraITI = 1;
-            punishmentSection(doExtraITI);
-            choice = Wrong;
-            break;
-          }
-          else { 
-       // Serial.println(answer);
-     }
-     answer = MISS;  
-   }
- }
-  // answer = getAnswers(answerPeriod);
-  if (answer == 2) {
-  // Miss! Do nonthing.
-}
-sendOutResults();
-trialCount++;
-delay(interTrialInterval);
-}
-}
-
 }
