@@ -307,7 +307,7 @@ while (i < maxNumTrials) {
 
   if (randNumber < probeTrial_frac) {
     consecutive_probe_trial_count = consecutive_probe_trial_count ++;
-    if (consecutive_probe_trial_count <= 2) {
+    if (consecutive_probe_trial_count < 2) {
       isProbeTrial[i] = 1;
       i = i++;
     }
