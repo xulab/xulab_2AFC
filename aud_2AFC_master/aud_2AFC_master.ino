@@ -4,7 +4,7 @@
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\xinyu\b02g03\test1202\settings_xinyu_b02g03_141201a.h"
 //#include "C:\Users\lab02\Documents\BehavData_2PRig\BehavData_2PRig\CLL\cll_G01\Settings\settings_cll_G01_141216.h"
 
-#include "/home/xulab/Behavior_rig_11/behavior_data_rig11/ZL/z01/Settings/ZL_z01_settings_150110.h"
+#include "/home/xulab/Behavior_rig_11/behavior_data_rig11/ZL/z01/Settings/ZL_z01_settings_150110_probe.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
 
 // #include "Settings/user/anm/settings_140808.h"
@@ -399,9 +399,9 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
     SPI_TGM.quick_noise_cosramp_5ms(preStim_cue_dur, f1, f2, preStim_cue_vol, SWEEP_NOISE_WHITE);
     // delay time after cue and before stimulus
     delay(post_cue_stim_delay);
-  }
-  else {
-    delay(rand_stimOnset);
+  // }
+  // else {
+  //   delay(rand_stimOnset);
   }
 
   // Play sound stimulus  
@@ -850,7 +850,10 @@ void loop() {
     digitalWrite(TriggerOutPin, HIGH);
     delay(1);
     digitalWrite(TriggerOutPin, LOW);
-    delay(rand_stimOnset);
+
+    if (preStim_cue_on[trialCount] != 1) {
+      delay(rand_stimOnset);
+    }
 
     stimulusDelivery(trialCount, currentSide, stimType_str);
 
