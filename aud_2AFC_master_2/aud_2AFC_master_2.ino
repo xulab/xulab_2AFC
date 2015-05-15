@@ -7,7 +7,7 @@
 //#include "/home/xulab/Behavior_rig_11/behavior_data_rig11/ztt/som04/settings/settings_20150112.h"
 //#include "Settings_stepTones_150121.h"
 //#include "Settings/CLL/cll_B11/settings_cued_purTone_141009.h"
-#include "/home/xulab/behavior_rig_01/behavior_data_rig01/Tardis02/Settings/Settings_stepTones_Tardis02_150129.h"
+#include "Settings_stepTones_example.h"
 // #include "Settings/user/anm/settings_140808.h"
 
 //#include "Settings/user/anm/settings_140808.h"
@@ -19,8 +19,8 @@
 #include <RCM.h>
 #include <Wire.h>
 #include <SPI.h>
-#include <Pulse.h>
-
+// #include <Pulse.h>
+//#include "CACHE.h"  //uncomment this line if this code is running on new TGM board
 
 
 #define leftWaterPort 11
@@ -454,9 +454,52 @@ void probeStimDelivery() {
           SPI_TGM.quick_sweep_exp_cosramp_5ms(stimDur, fq_on, fq_off, probe_sound_vol);
       
       } 
+
+
 }
 
+double cos_shifted(double phase, double mod_depth)
+{
+  return (double) (-cos(phase))*((1-mod_depth)/2)+((1+mod_depth)/2); //scale sin wave to 0.0001 - 1
+}
 
+void SAM_tone_display(int stimDur,uint16_t frequence,int Vol){
+   int wave_data_length;
+     int temp_vol;
+     double delta_amp;
+     double delta_vol;
+     long start_micro=0 ;
+     long temp_micro=0;
+     long delay_time =0;
+    
+
+     wave_data_length=stimDur/unit_dur; //give 2ms response time for each vol
+
+     // int Amp_value_data[wave_data_length];
+     double data_time=0;
+     // double vol_modu_range=modulation_range;
+     // SPI_TGM.tone_vol_rampup(frequence,Vol);
+     // delay(5);
+     start_micro=micros();
+     for (double m=1;m<=wave_data_length;m++){
+        // delta_vol = (vol_modu_range*sin(2*PI*carrier_wave_freq*(1*m/1000)));
+        // temp_micro=micros();
+        delta_amp = cos_shifted(2*PI*carrier_wave_freq*(m*unit_dur/1000), modu_depth);
+        delta_vol = 20*log10(delta_amp);
+        // Serial.println(delta_vol);
+        temp_vol = Vol + (delta_vol * 2);
+        if(temp_vol>0) SPI_TGM.set_tone_fq_vol(frequence,temp_vol);
+        else SPI_TGM.set_tone_fq_vol(frequence,0);
+        temp_micro = micros();
+        if((start_micro + (1000*unit_dur*m)) > temp_micro) 
+        {
+          delay_time = start_micro + (1000*unit_dur*m) - temp_micro;
+          delayMicroseconds(delay_time);
+         }
+     }
+     delay(1);
+     SPI_TGM.tone_vol_rampdown(frequence,temp_vol);
+}
 
 void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
 
@@ -630,6 +673,28 @@ void stimulusDelivery(int trialCount, int currentSide, char* stim_type) {
         stim_param_str += String(stim_type);
         two_tone_step(currentSide);
       }
+
+      if (strcmp(stim_type, "SAMtone") == 0) {
+
+       toneVolume = vol[currentSide];
+      toneFreq = fq_pureTone[currentSide];
+
+        stim_param_str += "/Stim_Type=";
+        stim_param_str += String(stim_type);
+        stim_param_str += "/Stim_toneFreq=";
+        stim_param_str += String(toneFreq);
+        // stim_param_str += "/Stim_toneIntensity=";
+        // stim_param_str += String(SPL_in_DB);
+        stim_param_str += "/Stim_setVolume=";
+        stim_param_str += String(toneVolume);
+        stim_param_str += "/stimDuration=";
+        stim_param_str += String(stimDur);
+
+    // SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
+    SAM_tone_display(stimDur, toneFreq ,toneVolume);
+    // delay (stimDur);
+
+    }
 
 } // void
 
