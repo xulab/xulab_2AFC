@@ -22,7 +22,7 @@ const int post_cue_stim_delay = 0; // delay time after cue and before stimulus
 // ============================================================
 // Stimulus properties
 // ============================================================
-char stimType[] = "2ToneSteps"; // "noise";// "pureTone";//"sweep";//randompureTone; //"2ToneSteps";
+char stimType[] = "2ToneSteps"; // "noise";// "pureTone";//"sweep";//randompureTone; //"2ToneSteps";//"SAMtone"
 
 const uint16_t referenceTones[2] = {10000, 20000};
 const uint16_t testTones_hi[2] = {14000, 28000};
@@ -96,6 +96,18 @@ const int drinkPeriod = 2000;
 
 const int errorLedDur = 10; 
 const int errorAirDur =0 ;
+
+//following settings will be used for SAM tone stimulus
+int unit_dur = 1; //min time for each tone pips.
+const uint16_t carrier_wave_freq = 10;
+const double modu_depth=0.001;
+/*
+    mod_depth   DB
+    0.1         20
+    0.01        40
+    0.001       60
+    0.0001      80
+  */
 
 // ============================================================
 // 1, right side; 0, left side
