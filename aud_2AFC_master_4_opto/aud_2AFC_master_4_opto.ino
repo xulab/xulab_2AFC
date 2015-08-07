@@ -957,14 +957,17 @@ void choice_outcome_state() {
     if (answer != MISS) {
       responseTime = trial_millis();
       // Probe trials
-      if (isProbeTrial[trialCount] == 1) {
-         
+     if (isProbeTrial[trialCount] == 1) {
         choice = answer;
         delay(waterValveDelay);
-        rewardDelivery(answer);
-        
+        if (round(random(0, 100)/50) == 1) {
+          rewardDelivery(choice);
+          waterValveOpenTime = trial_millis();
+        }
+        // rewardDelivery(answer);
         break;
       }
+
 
       if (answer == Correct) {
         delay(waterValveDelay);
