@@ -1084,9 +1084,11 @@ void loop() {
 
     if (isProbeTrial[trialCount] == 1) {
       probeStimDelivery();
+      delay(stimDur);
     }
     else {
       stimulusDelivery(trialCount, currentSide, stimType_str);  
+      delay(stimDur);
     }
     
     // Delay after stimulus, where licking doens't count.

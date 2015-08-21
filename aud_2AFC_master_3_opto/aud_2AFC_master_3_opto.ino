@@ -436,7 +436,7 @@ void probeStimDelivery() {
     // // int optoStim_Start_Time = trial_millis();
     // // pulse(optoStim_duration, pulse_freq, pulse_width, LaserOutPin);
         SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, probeToneFreq, probe_sound_vol);
-        delay(stimDur);
+        
         // PULSE.p1_sqr_wave(LaserOutPin, optoStim_duration, pulse_freq, pulse_width, TRG_H);
         
 
@@ -549,7 +549,7 @@ void probeStimDelivery() {
         
 
         SPI_TGM.quick_tone_vol_cosramp_5ms(stimDur, toneFreq, toneVolume);
-        delay(stimDur);
+       
 
         stim_param_str += "/Stim_Type=";
         stim_param_str += String(stim_type);
@@ -1068,11 +1068,13 @@ void loop() {
       
       delay(opto_PreSound_delay);
       probeStimDelivery();
+      delay(stimDur);
       
     }
     else {
       delay(rand_stimOnset);
       stimulusDelivery(trialCount, currentSide, stimType_str);  
+       delay(stimDur);
     }
     
     // Delay after stimulus, where licking doens't count.
